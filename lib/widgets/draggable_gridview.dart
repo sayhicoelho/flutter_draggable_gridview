@@ -5,7 +5,7 @@ class DraggableGridView<T> extends StatefulWidget {
   final int crossAxisCount;
   final List<DraggableGridViewItem<T>> items;
   final Widget Function(BuildContext, int, DraggableGridViewItem<T>) builder;
-  final void Function(List<DraggableGridViewItem<T>>) onSort;
+  final void Function() onSort;
 
   const DraggableGridView({
     Key key,
@@ -67,6 +67,7 @@ class _DraggableGridViewState<T> extends State<DraggableGridView<T>> {
                   }
 
                   widget.items[i].order = targetOrder;
+                  widget.onSort?.call();
                   setState(() {});
                 }
               )

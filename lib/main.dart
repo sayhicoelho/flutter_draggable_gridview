@@ -61,9 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  onSort: (items) {
+                  onSort: () {
                     print('onSort');
-                    print(items);
+                    print(_items);
                   }
                 ),
               ),
