@@ -40,7 +40,7 @@ class _DraggableGridViewState<T> extends State<DraggableGridView<T>> {
           child: Stack(
             overflow: Overflow.visible,
             children: [
-              for (int i = 0; i < widget.items.length; i++) DraggableGridViewTile(
+              for (int i = 0; i < widget.items.length; i++) DraggableGridViewTile<T>(
                 index: i,
                 width: tileWidth,
                 gridWidth: gridWidth,
@@ -117,14 +117,28 @@ class DraggableGridViewTile<T> extends StatefulWidget {
   _DraggableGridViewTileState<T> createState() => _DraggableGridViewTileState<T>();
 }
 
-class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> with TickerProviderStateMixin {
+class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> with WidgetsBindingObserver {
   bool _dragging = false;
   OverlayEntry _overlayEntry;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _setInitialTilePosition();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  Future<void> didChangeMetrics() async {
+    super.didChangeMetrics();
+    await Future.delayed(Duration(milliseconds: 100));
+    setState(_setInitialTilePosition);
   }
 
   void _setInitialTilePosition() {
@@ -185,7 +199,7 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
         Offset gridOffset = _getGridOffset();
         Overlay.of(context).insert(
           _overlayEntry = OverlayEntry(
-            builder: (context) => TileOverlay<T>(
+            builder: (context) => TileOverlay(
               left: widget.items[widget.index].x + gridOffset.dx,
               top: widget.items[widget.index].y + gridOffset.dy,
               width: widget.width,
@@ -200,8 +214,8 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
       },
       onDrop: () {
         widget.onDragStop?.call();
-        setState(_setInitialTilePosition);
         setState(() {
+          _setInitialTilePosition();
           _dragging = false;
         });
         _overlayEntry?.remove();
@@ -218,7 +232,7 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
   }
 }
 
-class TileOverlay<T> extends StatefulWidget {
+class TileOverlay extends StatefulWidget {
   final double left;
   final double top;
   final double width;
@@ -233,10 +247,10 @@ class TileOverlay<T> extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _TileOverlayState<T> createState() => _TileOverlayState<T>();
+  _TileOverlayState createState() => _TileOverlayState();
 }
 
-class _TileOverlayState<T> extends State<TileOverlay<T>> {
+class _TileOverlayState extends State<TileOverlay> {
   @override
   Widget build(BuildContext context) {
     return AnimatedPositioned(
