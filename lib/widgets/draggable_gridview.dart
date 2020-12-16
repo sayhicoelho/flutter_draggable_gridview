@@ -152,7 +152,8 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
     double y = globalPosition.dy - gridOffset.dy;
 
     var target = widget.items.firstWhere((item) {
-      if (item.order != widget.items[widget.index].order) {
+      if (item.order != widget.items[widget.index].order
+        && item.draggable) {
         if (x > item.x
           && x < (item.x + widget.width)
           && y > item.y
@@ -180,6 +181,7 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
     return Moveable(
       x: widget.items[widget.index].x,
       y: widget.items[widget.index].y,
+      canMove: widget.items[widget.index].draggable,
       onDragUpdate: (delta, globalPosition) {
         setState(() {
           widget.items[widget.index].x += delta.dx;
@@ -276,8 +278,9 @@ class DraggableGridViewItem<T> {
   double y;
   T data;
   int order;
+  bool draggable;
 
-  DraggableGridViewItem(this.data, this.order);
+  DraggableGridViewItem(this.data, this.order, {this.draggable = true});
 
   @override
   String toString() {

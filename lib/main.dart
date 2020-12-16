@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
     DraggableGridViewItem(Network('TikTok'), 17),
     DraggableGridViewItem(Network('Twitch'), 18),
     DraggableGridViewItem(Network('Venmo'), 19),
-    DraggableGridViewItem(Network('Custom Link'), 20),
+    DraggableGridViewItem(Network('Add Link'), 20, draggable: false),
   ];
 
   @override

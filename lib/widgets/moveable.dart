@@ -8,6 +8,7 @@ class Moveable extends StatefulWidget {
   final void Function() onDragStart;
   final void Function(Offset, Offset) onDragUpdate;
   final void Function() onDrop;
+  final bool canMove;
 
   const Moveable({
     Key key,
@@ -16,7 +17,8 @@ class Moveable extends StatefulWidget {
     @required this.y,
     this.onDragStart,
     this.onDragUpdate,
-    this.onDrop
+    this.onDrop,
+    this.canMove = true,
   }) : super(key: key);
 
   @override
@@ -34,7 +36,7 @@ class _MoveableState extends State<Moveable> {
       duration: const Duration(milliseconds: 150),
       curve: Curves.easeOut,
       child: GestureDetector(
-        onLongPressMoveUpdate: (details) {
+        onLongPressMoveUpdate: !widget.canMove ? null : (details) {
           if (_lastGlobalPosition == null) {
             _lastGlobalPosition = details.globalPosition;
           }
@@ -49,10 +51,10 @@ class _MoveableState extends State<Moveable> {
 
           _lastGlobalPosition = details.globalPosition;
         },
-        onLongPressStart: (details) {
+        onLongPressStart: !widget.canMove ? null : (details) {
           widget.onDragStart?.call();
         },
-        onLongPressEnd: (details) {
+        onLongPressEnd: !widget.canMove ? null : (details) {
           _lastGlobalPosition = null;
           widget.onDrop?.call();
         },
