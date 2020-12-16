@@ -10,3 +10,4 @@ A new Flutter plugin.
 * rolar tela ao arrastar para cima ou para baixo
 * adicionar opção pra animar itens (isso n é relevante, mas seria legal ter)
 * poder marcar uma tile como "não draggable"
+* chamar onSort apenas se a tile foi movida de lugar (atualmente, iniciar o drag e soltar, ele chama o onSort, mesmo nao alterando nada)
