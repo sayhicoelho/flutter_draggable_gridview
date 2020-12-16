@@ -33,6 +33,15 @@ class _HomeScreenState extends State<HomeScreen> {
     DraggableGridViewItem(Network('OnlyFans'), 9),
     DraggableGridViewItem(Network('Snapchat'), 10),
     DraggableGridViewItem(Network('SMS'), 11),
+    DraggableGridViewItem(Network('Telegram'), 12),
+    DraggableGridViewItem(Network('Apple Music'), 13),
+    DraggableGridViewItem(Network('Email'), 14),
+    DraggableGridViewItem(Network('SoundCloud'), 15),
+    DraggableGridViewItem(Network('Spotify'), 16),
+    DraggableGridViewItem(Network('TikTok'), 17),
+    DraggableGridViewItem(Network('Twitch'), 18),
+    DraggableGridViewItem(Network('Venmo'), 19),
+    DraggableGridViewItem(Network('Custom Link'), 20),
   ];
 
   @override
@@ -57,13 +66,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Center(
-                        child: Text('${item.data.name}')
+                        child: Text('${item.data.name}', textAlign: TextAlign.center,)
                       ),
                     ),
                   ),
                   onSort: () {
-                    print('onSort');
-                    print(_items);
+                    print('ON SORT!');
+                    // print(_items);
                   }
                 ),
               ),

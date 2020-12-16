@@ -5,6 +5,8 @@ class DraggableGridView<T> extends StatefulWidget {
   final int crossAxisCount;
   final List<DraggableGridViewItem<T>> items;
   final Widget Function(BuildContext, int, DraggableGridViewItem<T>) builder;
+  final void Function() onDragStart;
+  final void Function() onDragStop;
   final void Function() onSort;
 
   const DraggableGridView({
@@ -12,7 +14,9 @@ class DraggableGridView<T> extends StatefulWidget {
     @required this.crossAxisCount,
     @required this.items,
     @required this.builder,
-    @required this.onSort
+    this.onDragStart,
+    this.onDragStop,
+    this.onSort,
   }) : super(key: key);
 
   @override
@@ -45,6 +49,8 @@ class _DraggableGridViewState<T> extends State<DraggableGridView<T>> {
                 items: widget.items,
                 builder: widget.builder,
                 context: context,
+                onDragStart: widget.onDragStart,
+                onDragStop: widget.onDragStop,
                 onSort: (targetIndex) {
                   int oldOrder = widget.items[i].order;
                   bool isForward = widget.items[i].order < widget.items[targetIndex].order;
@@ -88,6 +94,8 @@ class DraggableGridViewTile<T> extends StatefulWidget {
   final int crossAxisCount;
   final List<DraggableGridViewItem<T>> items;
   final Widget Function(BuildContext, int, DraggableGridViewItem<T>) builder;
+  final void Function() onDragStart;
+  final void Function() onDragStop;
   final void Function(int) onSort;
 
   const DraggableGridViewTile({
@@ -100,6 +108,8 @@ class DraggableGridViewTile<T> extends StatefulWidget {
     @required this.crossAxisCount,
     @required this.items,
     @required this.builder,
+    @required this.onDragStart,
+    @required this.onDragStop,
     @required this.onSort,
   }) : super(key: key);
 
@@ -107,7 +117,7 @@ class DraggableGridViewTile<T> extends StatefulWidget {
   _DraggableGridViewTileState<T> createState() => _DraggableGridViewTileState<T>();
 }
 
-class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> {
+class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -149,7 +159,7 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> {
     return Moveable(
       x: widget.items[widget.index].x,
       y: widget.items[widget.index].y,
-      onDrag: (delta, globalPosition) {
+      onDragUpdate: (delta, globalPosition) {
         setState(() {
           widget.items[widget.index].x += delta.dx;
           widget.items[widget.index].y += delta.dy;
@@ -157,9 +167,24 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> {
 
         _handleTarget(globalPosition);
       },
+      onDragStart: () {
+        widget.onDragStart?.call();
+      },
       onDrop: () {
+        widget.onDragStop?.call();
         setState(_setInitialTilePosition);
       },
+      feedback: Transform.scale(
+        scale: 1.05,
+        child: Opacity(
+          opacity: .9,
+          child: Container(
+            width: widget.width,
+            height: widget.width,
+            child: widget.builder(context, widget.index, widget.items[widget.index]),
+          ),
+        )
+      ),
       child: Container(
         width: widget.width,
         height: widget.width,
