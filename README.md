@@ -7,7 +7,6 @@ A new Flutter plugin.
 * ~~só arrastar no evento "LongPress"~~
 * ~~aumentar tile com Transform.scale ao arrastar~~
 * ~~renderizar grid ao rotacionar a tela~~
+* ~~poder marcar uma tile como "não draggable"~~
 * rolar tela ao arrastar para cima ou para baixo
 * adicionar opção pra animar itens (isso n é relevante, mas seria legal ter)
-* poder marcar uma tile como "não draggable"
-* chamar onSort apenas se a tile foi movida de lugar (atualmente, iniciar o drag e soltar, ele chama o onSort, mesmo nao alterando nada)
