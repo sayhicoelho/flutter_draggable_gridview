@@ -5,7 +5,6 @@ class Moveable extends StatefulWidget {
   final double x;
   final double y;
   final Widget child;
-  final Widget feedback;
   final void Function() onDragStart;
   final void Function(Offset, Offset) onDragUpdate;
   final void Function() onDrop;
@@ -13,7 +12,6 @@ class Moveable extends StatefulWidget {
   const Moveable({
     Key key,
     @required this.child,
-    @required this.feedback,
     @required this.x,
     @required this.y,
     this.onDragStart,
@@ -27,7 +25,6 @@ class Moveable extends StatefulWidget {
 
 class _MoveableState extends State<Moveable> {
   Offset _lastGlobalPosition;
-  bool _moving = false;
 
   @override
   Widget build(BuildContext context) {
@@ -54,20 +51,12 @@ class _MoveableState extends State<Moveable> {
         },
         onLongPressStart: (details) {
           widget.onDragStart?.call();
-          setState(() {
-            _moving = true;
-          });
         },
         onLongPressEnd: (details) {
           _lastGlobalPosition = null;
           widget.onDrop?.call();
-          setState(() {
-            _moving = false;
-          });
         },
-        child: _moving
-          ? widget.feedback
-          : widget.child
+        child: widget.child
       ),
     );
   }

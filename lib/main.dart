@@ -70,9 +70,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
+                  onDragStop: () {
+                    print(_items);
+                  },
                   onSort: () {
                     print('ON SORT!');
-                    // print(_items);
                   }
                 ),
               ),

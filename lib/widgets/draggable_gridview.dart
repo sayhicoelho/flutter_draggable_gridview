@@ -118,6 +118,9 @@ class DraggableGridViewTile<T> extends StatefulWidget {
 }
 
 class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> with TickerProviderStateMixin {
+  bool _dragging = false;
+  OverlayEntry _overlayEntry;
+
   @override
   void initState() {
     super.initState();
@@ -130,8 +133,7 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
   }
 
   void _handleTarget(Offset globalPosition) {
-    RenderBox box = widget.context.findRenderObject();
-    Offset gridOffset = box.localToGlobal(Offset.zero);
+    Offset gridOffset = _getGridOffset();
     double x = globalPosition.dx - gridOffset.dx;
     double y = globalPosition.dy - gridOffset.dy;
 
@@ -154,6 +156,11 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
     }
   }
 
+  Offset _getGridOffset() {
+    RenderBox box = widget.context.findRenderObject();
+    return box.localToGlobal(Offset.zero);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Moveable(
@@ -163,32 +170,88 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
         setState(() {
           widget.items[widget.index].x += delta.dx;
           widget.items[widget.index].y += delta.dy;
+          _overlayEntry.markNeedsBuild();
         });
 
         _handleTarget(globalPosition);
       },
       onDragStart: () {
         widget.onDragStart?.call();
+
+        setState(() {
+          _dragging = true;
+        });
+
+        Offset gridOffset = _getGridOffset();
+        Overlay.of(context).insert(
+          _overlayEntry = OverlayEntry(
+            builder: (context) => TileOverlay<T>(
+              left: widget.items[widget.index].x + gridOffset.dx,
+              top: widget.items[widget.index].y + gridOffset.dy,
+              width: widget.width,
+              child: Container(
+                width: widget.width,
+                height: widget.width,
+                child: widget.builder(context, widget.index, widget.items[widget.index]),
+              )
+            )
+          )
+        );
       },
       onDrop: () {
         widget.onDragStop?.call();
         setState(_setInitialTilePosition);
+        setState(() {
+          _dragging = false;
+        });
+        _overlayEntry?.remove();
       },
-      feedback: Transform.scale(
+      child: Visibility(
+        visible: !_dragging,
+        child: Container(
+          width: widget.width,
+          height: widget.width,
+          child: widget.builder(context, widget.index, widget.items[widget.index]),
+        ),
+      ),
+    );
+  }
+}
+
+class TileOverlay<T> extends StatefulWidget {
+  final double left;
+  final double top;
+  final double width;
+  final Widget child;
+
+  const TileOverlay({
+    Key key,
+    @required this.left,
+    @required this.top,
+    @required this.width,
+    @required this.child
+  }) : super(key: key);
+
+  @override
+  _TileOverlayState<T> createState() => _TileOverlayState<T>();
+}
+
+class _TileOverlayState<T> extends State<TileOverlay<T>> {
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedPositioned(
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
+      left: widget.left,
+      top: widget.top,
+      width: widget.width,
+      height: widget.width,
+      child: Transform.scale(
         scale: 1.05,
         child: Opacity(
           opacity: .9,
-          child: Container(
-            width: widget.width,
-            height: widget.width,
-            child: widget.builder(context, widget.index, widget.items[widget.index]),
-          ),
+          child: widget.child,
         )
-      ),
-      child: Container(
-        width: widget.width,
-        height: widget.width,
-        child: widget.builder(context, widget.index, widget.items[widget.index]),
       ),
     );
   }
