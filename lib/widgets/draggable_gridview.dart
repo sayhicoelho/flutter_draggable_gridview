@@ -19,11 +19,11 @@ class DraggableGridView<T> extends StatefulWidget {
     @required this.crossAxisCount,
     @required this.items,
     @required this.builder,
+    @required this.scrollController,
     this.feedback,
     this.onDragStart,
     this.onDragStop,
     this.onSort,
-    this.scrollController,
   }) : super(key: key);
 
   @override
@@ -119,11 +119,11 @@ class DraggableGridViewTile<T> extends StatefulWidget {
     @required this.crossAxisCount,
     @required this.items,
     @required this.builder,
+    @required this.scrollController,
     this.feedback,
     this.onDragStart,
     this.onDragStop,
     this.onSort,
-    this.scrollController,
   }) : super(key: key);
 
   @override
