@@ -77,6 +77,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   scrollController: _scrollController,
                   crossAxisCount: 3,
                   items: _items,
+                  feedback: (context, index, item) => Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Text('FEEDBACK', textAlign: TextAlign.center,)
+                      ),
+                    ),
+                  ),
                   builder: (context, index, item) => Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),

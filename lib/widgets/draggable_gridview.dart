@@ -8,6 +8,7 @@ class DraggableGridView<T> extends StatefulWidget {
   final int crossAxisCount;
   final List<DraggableGridViewItem<T>> items;
   final Widget Function(BuildContext, int, DraggableGridViewItem<T>) builder;
+  final Widget Function(BuildContext, int, DraggableGridViewItem<T>) feedback;
   final void Function() onDragStart;
   final void Function() onDragStop;
   final void Function() onSort;
@@ -18,6 +19,7 @@ class DraggableGridView<T> extends StatefulWidget {
     @required this.crossAxisCount,
     @required this.items,
     @required this.builder,
+    this.feedback,
     this.onDragStart,
     this.onDragStop,
     this.onSort,
@@ -54,6 +56,7 @@ class _DraggableGridViewState<T> extends State<DraggableGridView<T>> {
                 scrollController: widget.scrollController,
                 items: widget.items,
                 builder: widget.builder,
+                feedback: widget.feedback,
                 context: context,
                 onDragStart: widget.onDragStart,
                 onDragStop: widget.onDragStop,
@@ -100,6 +103,7 @@ class DraggableGridViewTile<T> extends StatefulWidget {
   final int crossAxisCount;
   final List<DraggableGridViewItem<T>> items;
   final Widget Function(BuildContext, int, DraggableGridViewItem<T>) builder;
+  final Widget Function(BuildContext, int, DraggableGridViewItem<T>) feedback;
   final void Function() onDragStart;
   final void Function() onDragStop;
   final void Function(int) onSort;
@@ -115,6 +119,7 @@ class DraggableGridViewTile<T> extends StatefulWidget {
     @required this.crossAxisCount,
     @required this.items,
     @required this.builder,
+    this.feedback,
     this.onDragStart,
     this.onDragStop,
     this.onSort,
@@ -251,7 +256,9 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
               child: Container(
                 width: widget.width,
                 height: widget.width,
-                child: widget.builder(context, widget.index, widget.items[widget.index]),
+                child: widget.feedback != null
+                  ? widget.feedback(context, widget.index, widget.items[widget.index])
+                  : widget.builder(context, widget.index, widget.items[widget.index]),
               )
             )
           )
