@@ -44,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
     DraggableGridViewItem(Network('Add Link'), 20, draggable: false),
   ];
 
+  final _draggableGridViewController = DraggableGridViewController();
   final _scrollController = ScrollController();
 
   @override
@@ -74,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 color: Colors.red,
                 child: DraggableGridView<Network>(
+                  controller: _draggableGridViewController,
                   scrollController: _scrollController,
                   crossAxisCount: 3,
                   items: _items,

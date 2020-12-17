@@ -13,6 +13,7 @@ class DraggableGridView<T> extends StatefulWidget {
   final void Function() onDragStop;
   final void Function() onSort;
   final ScrollController scrollController;
+  final DraggableGridViewController controller;
 
   const DraggableGridView({
     Key key,
@@ -20,6 +21,7 @@ class DraggableGridView<T> extends StatefulWidget {
     @required this.items,
     @required this.builder,
     @required this.scrollController,
+    @required this.controller,
     this.feedback,
     this.onDragStart,
     this.onDragStop,
@@ -53,6 +55,7 @@ class _DraggableGridViewState<T> extends State<DraggableGridView<T>> {
                 gridWidth: gridWidth,
                 gridHeight: gridHeight,
                 crossAxisCount: widget.crossAxisCount,
+                controller: widget.controller,
                 scrollController: widget.scrollController,
                 items: widget.items,
                 builder: widget.builder,
@@ -108,6 +111,7 @@ class DraggableGridViewTile<T> extends StatefulWidget {
   final void Function() onDragStop;
   final void Function(int) onSort;
   final ScrollController scrollController;
+  final DraggableGridViewController controller;
 
   const DraggableGridViewTile({
     Key key,
@@ -120,6 +124,7 @@ class DraggableGridViewTile<T> extends StatefulWidget {
     @required this.items,
     @required this.builder,
     @required this.scrollController,
+    @required this.controller,
     this.feedback,
     this.onDragStart,
     this.onDragStop,
@@ -139,6 +144,11 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    widget.controller.init(
+      widget.items,
+      widget.width,
+      widget.crossAxisCount,
+    );
     _setInitialTilePosition();
   }
 
@@ -156,8 +166,7 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
   }
 
   void _setInitialTilePosition() {
-    widget.items[widget.index].x = widget.width * ((widget.items[widget.index].order - 1) % widget.crossAxisCount);
-    widget.items[widget.index].y = widget.width * (((widget.items[widget.index].order - 1) / widget.crossAxisCount) % widget.items.length).floor();
+    widget.controller.resort(widget.items[widget.index]);
   }
 
   void _handleTarget(double x, double y) {
@@ -226,11 +235,13 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
         if (globalPosition.dy <= (kToolbarHeight + 100.0)
           && widget.scrollController.offset > gridOffset.dy
           && !_animatingScroll) {
-          _animateScroll(absoluteGridOffsetTop - 100);
+          // _animateScroll(absoluteGridOffsetTop - 100);
+          _animateScroll(0.0);
         } else if (globalPosition.dy >= (MediaQuery.of(context).size.height - 100.0)
           && (MediaQuery.of(context).size.height + widget.scrollController.offset) < (absoluteGridOffsetBottom)
           && !_animatingScroll) {
-          _animateScroll((absoluteGridOffsetBottom - MediaQuery.of(context).size.height) + 20);
+          // _animateScroll((absoluteGridOffsetBottom - MediaQuery.of(context).size.height) + 20);
+          _animateScroll(widget.scrollController.position.maxScrollExtent);
         } else if (globalPosition.dy > (kToolbarHeight + 100.0)
           && globalPosition.dy < (MediaQuery.of(context).size.height - 100.0)
           && _animatingScroll) {
@@ -313,9 +324,9 @@ class _TileOverlayState extends State<TileOverlay> {
       width: widget.width,
       height: widget.width,
       child: Transform.scale(
-        scale: 1.05,
+        scale: 1.2,
         child: Opacity(
-          opacity: .9,
+          opacity: 1,
           child: widget.child,
         )
       ),
@@ -334,6 +345,27 @@ class DraggableGridViewItem<T> {
 
   @override
   String toString() {
-    return 'DraggableGridViewItem(x: $x, y: $y, data: $data, order: $order)';
+    return 'DraggableGridViewItem(x: $x, y: $y, data: $data, order: $order, draggable: $draggable)';
+  }
+}
+
+class DraggableGridViewController {
+  List<DraggableGridViewItem> _items;
+  double _width;
+  int _crossAxisCount;
+
+  void init(List<DraggableGridViewItem> items, double width, int crossAxisCount) {
+    _items = items;
+    _width = width;
+    _crossAxisCount = crossAxisCount;
+  }
+
+  void resort(DraggableGridViewItem item) {
+    item.x = _width * ((item.order - 1) % _crossAxisCount);
+    item.y = _width * (((item.order - 1) / _crossAxisCount) % _items.length).floor();
+  }
+
+  void resortAll() {
+    _items.forEach(resort);
   }
 }
