@@ -44,6 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
     DraggableGridViewItem(Network('Add Link'), 20, draggable: false),
   ];
 
+  final _scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,15 +53,28 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text('Home'),
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
+              padding: const EdgeInsets.only(left: 36.0, top: 36.0, right: 36.0),
+              child: Center(
+                child: RaisedButton(
+                  color: Theme.of(context).primaryColor,
+                  textColor: Colors.white,
+                  onPressed: () {},
+                  child: Text('Button'),
+                ),
+              ),
+            ),
+            Padding(
               padding: const EdgeInsets.all(36.0),
               child: Container(
                 color: Colors.red,
                 child: DraggableGridView<Network>(
+                  scrollController: _scrollController,
                   crossAxisCount: 3,
                   items: _items,
                   builder: (context, index, item) => Card(
@@ -71,14 +86,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   onDragStop: () {
-                    print(_items);
+                    // print(_items);
                   },
                   onSort: () {
-                    print('ON SORT!');
+                    // print('ON SORT!');
                   }
                 ),
               ),
-            )
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 36.0, bottom: 36.0, right: 36.0),
+              child: Center(
+                child: RaisedButton(
+                  color: Theme.of(context).primaryColor,
+                  textColor: Colors.white,
+                  onPressed: () {},
+                  child: Text('Button'),
+                ),
+              ),
+            ),
           ],
         ),
       ),

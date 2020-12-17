@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_draggable_gridview/widgets/moveable.dart';
 
 class DraggableGridView<T> extends StatefulWidget {
@@ -8,6 +11,7 @@ class DraggableGridView<T> extends StatefulWidget {
   final void Function() onDragStart;
   final void Function() onDragStop;
   final void Function() onSort;
+  final ScrollController scrollController;
 
   const DraggableGridView({
     Key key,
@@ -17,6 +21,7 @@ class DraggableGridView<T> extends StatefulWidget {
     this.onDragStart,
     this.onDragStop,
     this.onSort,
+    this.scrollController,
   }) : super(key: key);
 
   @override
@@ -46,6 +51,7 @@ class _DraggableGridViewState<T> extends State<DraggableGridView<T>> {
                 gridWidth: gridWidth,
                 gridHeight: gridHeight,
                 crossAxisCount: widget.crossAxisCount,
+                scrollController: widget.scrollController,
                 items: widget.items,
                 builder: widget.builder,
                 context: context,
@@ -97,6 +103,7 @@ class DraggableGridViewTile<T> extends StatefulWidget {
   final void Function() onDragStart;
   final void Function() onDragStop;
   final void Function(int) onSort;
+  final ScrollController scrollController;
 
   const DraggableGridViewTile({
     Key key,
@@ -108,9 +115,10 @@ class DraggableGridViewTile<T> extends StatefulWidget {
     @required this.crossAxisCount,
     @required this.items,
     @required this.builder,
-    @required this.onDragStart,
-    @required this.onDragStop,
-    @required this.onSort,
+    this.onDragStart,
+    this.onDragStop,
+    this.onSort,
+    this.scrollController,
   }) : super(key: key);
 
   @override
@@ -119,6 +127,7 @@ class DraggableGridViewTile<T> extends StatefulWidget {
 
 class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> with WidgetsBindingObserver {
   bool _dragging = false;
+  bool _animatingScroll = false;
   OverlayEntry _overlayEntry;
 
   @override
@@ -146,11 +155,7 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
     widget.items[widget.index].y = widget.width * (((widget.items[widget.index].order - 1) / widget.crossAxisCount) % widget.items.length).floor();
   }
 
-  void _handleTarget(Offset globalPosition) {
-    Offset gridOffset = _getGridOffset();
-    double x = globalPosition.dx - gridOffset.dx;
-    double y = globalPosition.dy - gridOffset.dy;
-
+  void _handleTarget(double x, double y) {
     var target = widget.items.firstWhere((item) {
       if (item.order != widget.items[widget.index].order
         && item.draggable) {
@@ -176,6 +181,24 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
     return box.localToGlobal(Offset.zero);
   }
 
+  void _animateScroll(double offset) {
+    _animatingScroll = true;
+    widget.scrollController.animateTo(
+      offset,
+      duration: const Duration(seconds: 1),
+      curve: Curves.easeInOut
+    );
+  }
+
+  void _stopScrollAnimation() {
+    _animatingScroll = false;
+    widget.scrollController.animateTo(
+      widget.scrollController.offset,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOutQuad
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Moveable(
@@ -189,7 +212,27 @@ class _DraggableGridViewTileState<T> extends State<DraggableGridViewTile<T>> wit
           _overlayEntry.markNeedsBuild();
         });
 
-        _handleTarget(globalPosition);
+        var gridOffset = _getGridOffset();
+        var x = globalPosition.dx - gridOffset.dx;
+        var y = globalPosition.dy - gridOffset.dy;
+        var absoluteGridOffsetTop = widget.scrollController.offset + gridOffset.dy;
+        var absoluteGridOffsetBottom = widget.gridHeight + absoluteGridOffsetTop;
+
+        if (globalPosition.dy <= (kToolbarHeight + 100.0)
+          && widget.scrollController.offset > gridOffset.dy
+          && !_animatingScroll) {
+          _animateScroll(absoluteGridOffsetTop - 100);
+        } else if (globalPosition.dy >= (MediaQuery.of(context).size.height - 100.0)
+          && (MediaQuery.of(context).size.height + widget.scrollController.offset) < (absoluteGridOffsetBottom)
+          && !_animatingScroll) {
+          _animateScroll((absoluteGridOffsetBottom - MediaQuery.of(context).size.height) + 20);
+        } else if (globalPosition.dy > (kToolbarHeight + 100.0)
+          && globalPosition.dy < (MediaQuery.of(context).size.height - 100.0)
+          && _animatingScroll) {
+          _stopScrollAnimation();
+        }
+
+        _handleTarget(x, y);
       },
       onDragStart: () {
         widget.onDragStart?.call();

@@ -8,5 +8,5 @@ A new Flutter plugin.
 * ~~aumentar tile com Transform.scale ao arrastar~~
 * ~~renderizar grid ao rotacionar a tela~~
 * ~~poder marcar uma tile como "não draggable"~~
-* rolar tela ao arrastar para cima ou para baixo
+* ~~rolar tela ao arrastar para cima ou para baixo~~
 * adicionar opção pra animar itens (isso n é relevante, mas seria legal ter)
